@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+.idea/
+backups/
+data/
+log/
+.coverage
+.vscode/
+
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
