@@ -1,3 +1,5 @@
+# app/services/currency_service.py
+
 """Service for managing currency conversion and exchange rates."""
 
 import logging

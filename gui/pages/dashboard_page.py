@@ -1,3 +1,5 @@
+# gui/pages/dashboard_page.py
+
 import calendar
 from datetime import datetime
 
@@ -76,7 +78,7 @@ def show_dashboard_page():
 
         st.divider()
 
-        # Smart Predictions 
+        # Smart Predictions
         _show_spending_prediction_widget(
             prediction_service, current_year, current_month
         )

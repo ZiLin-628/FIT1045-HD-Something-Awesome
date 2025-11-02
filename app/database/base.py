@@ -1,4 +1,4 @@
-# database/base.py
+# app/database/base.py
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker

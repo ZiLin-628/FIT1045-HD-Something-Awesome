@@ -1,3 +1,5 @@
+# gui/pages/summary_page.py
+
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -76,9 +78,9 @@ def daily_summary_view(summary_service: SummaryService):
         summary = summary_service.get_daily_summary(date_obj)
 
         # Display summary
-        
+
         st.markdown("<br>", unsafe_allow_html=True)
-        
+
         st.subheader(f"Summary for {summary['date']}")
 
         col1, col2, col3, col4 = st.columns(4)
@@ -306,7 +308,7 @@ def expenses_by_category_view(summary_service: SummaryService):
 
             if expenses:
                 st.markdown("<br>", unsafe_allow_html=True)
-                
+
                 st.subheader(
                     f"Expenses from {start_date.strftime('%d-%m-%Y')} to {end_date.strftime('%d-%m-%Y')}"
                 )
@@ -399,8 +401,8 @@ def income_by_category_view(summary_service: SummaryService):
             )
 
             if income:
-                st.markdown("<br>", unsafe_allow_html=True)                
-                
+                st.markdown("<br>", unsafe_allow_html=True)
+
                 st.subheader(
                     f"Income from {start_date.strftime('%d-%m-%Y')} to {end_date.strftime('%d-%m-%Y')}"
                 )

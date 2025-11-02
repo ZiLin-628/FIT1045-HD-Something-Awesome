@@ -1,4 +1,4 @@
-# category_service.py
+# app/services/category_service.py
 
 import logging
 from sqlalchemy.exc import IntegrityError

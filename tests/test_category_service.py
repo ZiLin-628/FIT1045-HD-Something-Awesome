@@ -1,11 +1,17 @@
+# tests/test_category_service.py
+
 from unittest.mock import MagicMock
 
 import pytest
 from sqlalchemy.exc import IntegrityError
 
 from app.database.models import Category, Transaction, TransactionType
-from app.exception import (AlreadyExistsError, CategoryInUseError,
-                           InvalidInputError, NotFoundError)
+from app.exception import (
+    AlreadyExistsError,
+    CategoryInUseError,
+    InvalidInputError,
+    NotFoundError,
+)
 from app.services.category_service import CategoryService
 
 

@@ -1,3 +1,5 @@
+# gui/pages/transaction_operation_page.py
+
 from datetime import datetime
 from decimal import Decimal
 

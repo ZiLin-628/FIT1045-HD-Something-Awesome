@@ -1,4 +1,4 @@
-# filter_service.py
+# app/services/filter_service.py
 
 import logging
 from sqlalchemy.orm import Session

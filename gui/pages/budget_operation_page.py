@@ -1,3 +1,5 @@
+# gui/pages/budget_operation_page.py
+
 from datetime import datetime
 
 import pandas as pd

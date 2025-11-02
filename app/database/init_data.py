@@ -1,4 +1,4 @@
-# init_data.py
+# app/database/init_data.py
 
 import logging
 from sqlalchemy.orm import Session
@@ -58,4 +58,3 @@ def initialize_default_categories(db_session: Session) -> None:
         logger.info("Default categories initialized successfully")
     else:
         logger.info("Categories already exist, skipping initialization")
-

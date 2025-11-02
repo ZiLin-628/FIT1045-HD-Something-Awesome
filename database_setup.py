@@ -1,3 +1,5 @@
+# database_setup.py
+
 """Initialize or reset the database."""
 
 from app.database.base import Base, SessionLocal, engine

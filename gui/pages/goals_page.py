@@ -1,3 +1,5 @@
+# gui/pages/goals_page.py
+
 """Financial Goals page for tracking savings goals."""
 
 from datetime import datetime, date

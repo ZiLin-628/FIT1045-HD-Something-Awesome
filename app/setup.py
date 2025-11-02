@@ -1,3 +1,5 @@
+# app/setup.py
+
 """Utility functions for ensuring application setup."""
 
 import logging

@@ -1,3 +1,5 @@
+# gui/pages/category_operation.py
+
 import pandas as pd
 import streamlit as st
 
@@ -251,9 +253,10 @@ def delete_category_view(category_service: CategoryService):
 
         if submitted:
             if not confirm:
-                
-                utility.warning_popup("Please confirm deletion by checking the checkbox above.")
-                
+
+                utility.warning_popup(
+                    "Please confirm deletion by checking the checkbox above."
+                )
 
             try:
                 # Delete the category

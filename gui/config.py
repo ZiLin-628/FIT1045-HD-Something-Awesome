@@ -1,3 +1,5 @@
+# gui/config.py
+
 from enum import Enum
 
 from gui.pages.account_operation_page import show_account_operation_page

@@ -1,4 +1,4 @@
-# summary_service.py
+# app/services/summary_service.py
 
 import logging
 from datetime import datetime, timedelta

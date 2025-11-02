@@ -1,4 +1,4 @@
-# database/models.py
+# app/database/models.py
 
 import enum
 from decimal import Decimal

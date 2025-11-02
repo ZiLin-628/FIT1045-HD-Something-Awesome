@@ -1,3 +1,5 @@
+# app/currency.py
+
 """Currency management constants and utilities."""
 
 import logging
