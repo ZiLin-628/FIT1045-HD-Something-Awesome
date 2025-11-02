@@ -4,10 +4,11 @@ import logging
 
 from gui.start import launch
 
+
 def init_logger(log_file="log/app.log"):
     """Configures the logger to write to a file."""
 
-    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    log_format = "%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s"
     date_format = "%d-%m-%Y %H:%M:%S"
 
     logging.basicConfig(
@@ -19,8 +20,9 @@ def init_logger(log_file="log/app.log"):
     )
 
 
-
 def main():
+
+    init_logger()
 
     launch()
 
