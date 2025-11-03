@@ -118,9 +118,8 @@ def add_account_view(account_service: AccountService):
             )
 
         with col2:
-            currency_symbol = get_currency_symbol(currency)
             initial_balance = st.number_input(
-                f"Initial Balance ({currency_symbol})",
+                "Initial Balance",
                 min_value=0.0,
                 value=0.0,
                 step=0.01,

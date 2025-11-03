@@ -92,7 +92,7 @@ def show_dashboard_page():
 def _show_budget_summary_widget(budget_service: BudgetService):
     """Display budget summary widget showing budgets at risk."""
 
-    st.subheader("Budget Overview (Current Usage)")
+    st.subheader("Budget Overview")
 
     try:
         # Get budgets at risk (80% or higher)
@@ -188,7 +188,7 @@ def _show_spending_prediction_widget(
 ):
     """Display spending prediction widget using EWMA."""
 
-    st.subheader("Smart Spending Forecast (Predicted End-of-Period)")
+    st.subheader("Smart Spending Prediction")
 
     try:
         # Get predictions for all categories with budgets
