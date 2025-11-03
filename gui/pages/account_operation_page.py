@@ -98,7 +98,7 @@ def add_account_view(account_service: AccountService):
 
     st.subheader("Add New Account")
 
-    with st.form("add_account_form", clear_on_submit=True):
+    with st.form("add_account_form", clear_on_submit=False):
 
         # Input fields
         account_name = st.text_input(
@@ -122,9 +122,11 @@ def add_account_view(account_service: AccountService):
             initial_balance = st.number_input(
                 f"Initial Balance ({currency_symbol})",
                 min_value=0.0,
+                value=0.0,
                 step=0.01,
                 format="%.2f",
                 help="Enter the starting balance (will be converted to MYR)",
+                key="initial_balance_input"
             )
 
         # Submit button
