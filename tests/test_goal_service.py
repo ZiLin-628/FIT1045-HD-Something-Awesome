@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from app.database.models import Goal
+from app.database.models import Goal, Transaction, TransactionType
 from app.exception import AlreadyExistsError, InvalidInputError, NotFoundError
 from app.services.goal_service import GoalService
 
@@ -50,20 +50,22 @@ class TestAddGoal:
         assert isinstance(g, Goal)
         assert g.name == "New goal"  # capitalized by validator
         assert g.target_amount == Decimal("500.00")
-        assert g.initial_balance == Decimal("1000.00")
+        assert g.initial_balance == Decimal(
+            "0"
+        )  # Always starts at 0 with net income tracking
         assert g.account_id == 1
         assert g.is_completed == 0
         assert g.description == "save more"
         mock_db_session.add.assert_called_once_with(g)
         mock_db_session.commit.assert_called_once()
 
-    def test_add_goal_without_account_uses_total_balance(
+    def test_add_goal_without_account_uses_zero_initial_balance(
         self, goal_service, mock_db_session, mock_account_service
     ):
         # No duplicate
         mock_db_session.query().filter_by().first.return_value = None
 
-        # Two accounts with balances
+        # Two accounts with balances (not used for initial_balance anymore)
         acc1 = MagicMock(balance=Decimal("100.00"))
         acc2 = MagicMock(balance=Decimal("250.50"))
         mock_account_service.get_all_accounts.return_value = [acc1, acc2]
@@ -75,7 +77,9 @@ class TestAddGoal:
             deadline=future_deadline,
         )
 
-        assert g.initial_balance == Decimal("350.50")
+        assert g.initial_balance == Decimal(
+            "0"
+        )  # Always starts at 0 with net income tracking
         assert g.account_id is None
 
     def test_add_goal_duplicate_name_raises(self, goal_service, mock_db_session):
@@ -161,29 +165,36 @@ class TestGetGoals:
 class TestCalculateGoalProgress:
 
     def test_progress_for_all_accounts_on_track(
-        self, goal_service, mock_account_service
+        self, goal_service, mock_db_session, mock_account_service
     ):
-        # Goal without specific account
+        # Goal without specific account - uses net income tracking
         today = date.today()
         goal = Goal(
             id=3,
             name="Save",
             target_amount=Decimal("500"),
-            initial_balance=Decimal("1000"),
+            initial_balance=Decimal("0"),  # Always 0 with net income tracking
             deadline=datetime.combine(today + timedelta(days=20), datetime.min.time()),
             created_at=datetime.combine(
                 today - timedelta(days=10), datetime.min.time()
             ),
         )
 
-        # Current accounts total = 1300
-        a1 = MagicMock(balance=Decimal("800"))
-        a2 = MagicMock(balance=Decimal("500"))
-        mock_account_service.get_all_accounts.return_value = [a1, a2]
+        # Mock transactions: Income = 400, Expenses = 100, Net = 300
+        income_txn = MagicMock(amount_in_myr=Decimal("400"))
+        expense_txn = MagicMock(amount_in_myr=Decimal("100"))
+
+        # Mock query chain for transactions
+        mock_query = MagicMock()
+        mock_db_session.query.return_value = mock_query
+        mock_query.filter.return_value = mock_query
+
+        # First call returns income transactions, second call returns expense transactions
+        mock_query.all.side_effect = [[income_txn], [expense_txn]]
 
         result = goal_service.calculate_goal_progress(goal)
 
-        assert result["progress_amount"] == pytest.approx(300.0)
+        assert result["progress_amount"] == pytest.approx(300.0)  # 400 - 100
         assert result["progress_pct"] == pytest.approx(60.0)
         assert result["days_total"] == 30
         assert result["days_passed"] == 10
@@ -196,24 +207,37 @@ class TestCalculateGoalProgress:
         assert result["account_name"] == "All Accounts"
 
     def test_progress_for_linked_account_achieved(
-        self, goal_service, mock_account_service
+        self, goal_service, mock_db_session, mock_account_service
     ):
         today = date.today()
         goal = Goal(
             id=4,
             name="Phone",
             target_amount=Decimal("200"),
-            initial_balance=Decimal("0"),
+            initial_balance=Decimal("0"),  # Always 0 with net income tracking
             deadline=datetime.combine(today + timedelta(days=5), datetime.min.time()),
             created_at=datetime.combine(today - timedelta(days=5), datetime.min.time()),
             account_id=1,
         )
 
-        # Only one account with id=1
-        acc = MagicMock(id=1, balance=Decimal("250"))
-        mock_account_service.get_all_accounts.return_value = [acc]
+        # Mock account
+        acc = MagicMock(id=1, name="Savings", balance=Decimal("250"))
+        mock_account_service.get_account.return_value = acc
+
+        # Mock transactions: Income = 300, Expenses = 50, Net = 250 (125% of 200 target)
+        income_txn = MagicMock(amount_in_myr=Decimal("300"))
+        expense_txn = MagicMock(amount_in_myr=Decimal("50"))
+
+        # Mock query chain for transactions
+        mock_query = MagicMock()
+        mock_db_session.query.return_value = mock_query
+        mock_query.filter.return_value = mock_query
+
+        # First call returns income transactions, second call returns expense transactions
+        mock_query.all.side_effect = [[income_txn], [expense_txn]]
 
         result = goal_service.calculate_goal_progress(goal)
+        assert result["progress_amount"] == pytest.approx(250.0)  # 300 - 50
         assert result["progress_pct"] == pytest.approx(125.0)
         assert result["status"] in {"on_track", "achieved"}
 

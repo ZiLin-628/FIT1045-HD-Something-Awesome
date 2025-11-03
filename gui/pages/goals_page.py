@@ -18,7 +18,7 @@ from app.services.goal_service import GoalService
 def show_goals_page():
     """Display the financial goals page."""
 
-    st.title("🎯 Financial Goals")
+    st.title("Goals")
 
     # Create database session and services
     db_session = SessionLocal()
@@ -28,7 +28,7 @@ def show_goals_page():
 
     # Create tabs
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["➕ Add Goal", "📊 View Goals", "✏️ Edit Goal", "🗑️ Delete Goal"]
+        ["Add Goal", "View Goals", "Edit Goal", "Delete Goal"]
     )
 
     try:
@@ -55,8 +55,7 @@ def add_goal_view(goal_service: GoalService, account_service: AccountService):
 
     # Goal name
     name = st.text_input(
-        "Goal Name *",
-        placeholder="e.g., Save for Vacation, Emergency Fund",
+        "Goal Name",
         help="Give your goal a descriptive name",
     )
 
@@ -64,7 +63,7 @@ def add_goal_view(goal_service: GoalService, account_service: AccountService):
     col1, col2 = st.columns([2, 1])
     with col1:
         target_amount = st.number_input(
-            "Target Amount (RM) *",
+            "Target Amount (RM)",
             min_value=0.01,
             step=100.0,
             format="%.2f",
@@ -78,7 +77,7 @@ def add_goal_view(goal_service: GoalService, account_service: AccountService):
 
     # Deadline
     deadline = st.date_input(
-        "Deadline *",
+        "Deadline",
         min_value=date.today(),
         value=date.today(),
         help="When do you want to achieve this goal?",
@@ -103,13 +102,16 @@ def add_goal_view(goal_service: GoalService, account_service: AccountService):
     )
 
     # Submit button
-    if st.button("🎯 Create Goal", type="primary", use_container_width=True):
+    if st.button("Create Goal"):
         if not name or not name.strip():
             utility.error_popup("Please enter a goal name")
+
         elif target_amount <= 0:
             utility.error_popup("Target amount must be greater than 0")
+
         elif deadline <= date.today():
             utility.error_popup("Deadline must be in the future")
+
         else:
             try:
                 # Determine account name
@@ -127,7 +129,6 @@ def add_goal_view(goal_service: GoalService, account_service: AccountService):
                 )
 
                 utility.success_popup(f"Goal '{name}' created successfully! 🎉")
-                st.rerun()
 
             except (InvalidInputError, NotFoundError) as e:
                 utility.error_popup(f"Error: {e}")
@@ -141,7 +142,7 @@ def view_goals_view(goal_service: GoalService):
     goals = goal_service.get_all_goals()
 
     if not goals:
-        st.info("📝 No goals yet. Create your first goal to start tracking progress!")
+        st.info("No goals yet. Create your first goal to start tracking progress!")
         return
 
     # Separate active and completed
@@ -166,7 +167,7 @@ def view_goals_view(goal_service: GoalService):
 
     # Display active goals
     if active_goals:
-        st.subheader("🎯 Active Goals")
+        st.subheader("Active Goals")
 
         for goal in active_goals:
             display_goal_card(goal, goal_service)
@@ -174,7 +175,7 @@ def view_goals_view(goal_service: GoalService):
     # Display completed goals
     if completed_goals:
         st.divider()
-        st.subheader("✅ Completed Goals")
+        st.subheader("Completed Goals")
 
         for goal in completed_goals:
             display_goal_card(goal, goal_service, is_completed=True)
@@ -185,31 +186,11 @@ def display_goal_card(goal: Goal, goal_service: GoalService, is_completed=False)
 
     progress = goal_service.calculate_goal_progress(goal)
 
-    # Choose color based on status
-    if is_completed or progress["status"] == "completed":
-        border_color = "#28a745"  # Green
-        status_emoji = "✅"
-    elif progress["status"] == "achieved":
-        border_color = "#17a2b8"  # Blue
-        status_emoji = "🎉"
-    elif progress["status"] == "on_track":
-        border_color = "#28a745"  # Green
-        status_emoji = "📈"
-    elif progress["status"] == "behind":
-        border_color = "#ffc107"  # Yellow
-        status_emoji = "⚠️"
-    elif progress["status"] == "overdue":
-        border_color = "#dc3545"  # Red
-        status_emoji = "⏰"
-    else:
-        border_color = "#6c757d"  # Gray
-        status_emoji = "🎯"
-
     with st.container(border=True):
         # Header
         col1, col2 = st.columns([3, 1])
         with col1:
-            st.markdown(f"### {status_emoji} {goal.name}")
+            st.markdown(f"### {goal.name}")
         with col2:
             if not is_completed and progress["status"] != "completed":
                 if st.button("✓ Complete", key=f"complete_{goal.id}", type="secondary"):
@@ -223,18 +204,18 @@ def display_goal_card(goal: Goal, goal_service: GoalService, is_completed=False)
                         utility.error_popup(f"Error: {e}")
 
         # Progress bar
-        progress_val = min(progress["progress_pct"] / 100, 1.0)
+        progress_val = max(0.0, min(progress["progress_pct"] / 100, 1.0))
         st.progress(
             progress_val,
             text=f"{progress['progress_pct']:.1f}% Complete",
         )
 
         # Stats
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.metric(
-                "Current",
-                f"RM {progress['current_amount']:,.2f}",
+                "Current (Net)",
+                f"RM {progress['progress_amount']:,.2f}",
             )
         with col2:
             st.metric(
@@ -246,31 +227,35 @@ def display_goal_card(goal: Goal, goal_service: GoalService, is_completed=False)
                 "Remaining",
                 f"RM {progress['remaining_amount']:,.2f}",
             )
+        with col4:
+            st.metric(
+                "Income",
+                f"RM {progress.get('total_income', 0):,.2f}",
+                delta=f"-RM {progress.get('total_expenses', 0):,.2f}",
+                delta_color="inverse",
+            )
 
         # Timeline
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.caption(f"⏱️ **Deadline:** {progress['deadline']}")
+            st.caption(f"**Deadline:** {progress['deadline']}")
         with col2:
-            st.caption(f"📆 **Days Remaining:** {progress['days_remaining']}")
+            st.caption(f"**Days Remaining:** {progress['days_remaining']}")
         with col3:
-            st.caption(f"📍 **Track From:** {progress['account_name']}")
+            st.caption(f"**Track From:** {progress['account_name']}")
 
         # Recommendations (if not completed)
         if not is_completed and progress["status"] not in ["completed", "achieved"]:
-            st.divider()
 
             # Status message
             if progress["status"] == "on_track":
-                st.success(f"**Status:** On track! 📈 Keep up the great work!")
+                st.success("**Status:** On track! Keep up the great work!")
             elif progress["status"] == "behind":
                 st.warning(
-                    f"**Status:** Behind schedule ⚠️ You're {progress['expected_progress_pct'] - progress['progress_pct']:.1f}% below expected progress"
+                    f"**Status:** Behind schedule You're {progress['expected_progress_pct'] - progress['progress_pct']:.1f}% below expected progress"
                 )
             elif progress["status"] == "overdue":
-                st.error(
-                    f"**Status:** Deadline passed ⏰ Consider extending the deadline"
-                )
+                st.error("**Status:** Deadline passed Consider extending the deadline")
 
             # Savings recommendations
             if progress["days_remaining"] > 0:
@@ -288,7 +273,7 @@ def display_goal_card(goal: Goal, goal_service: GoalService, is_completed=False)
 
         # Description
         if goal.description:
-            with st.expander("📝 Description"):
+            with st.expander("Description"):
                 st.write(goal.description)
 
 
@@ -313,8 +298,6 @@ def edit_goal_view(goal_service: GoalService):
 
     if selected_index is not None:
         goal = goals[selected_index]
-
-        st.divider()
 
         # Edit form
         name = st.text_input("Goal Name", value=goal.name)
@@ -345,7 +328,7 @@ def edit_goal_view(goal_service: GoalService):
         )
 
         # Submit button
-        if st.button("💾 Save Changes", type="primary", use_container_width=True):
+        if st.button("Save Changes"):
             try:
                 goal_service.edit_goal(
                     goal_id=goal.id,
@@ -387,32 +370,24 @@ def delete_goal_view(goal_service: GoalService):
     if selected_index is not None:
         goal = goals[selected_index]
 
-        st.divider()
-
-        # Show goal details
-        st.warning(f"**You are about to delete:** {goal.name}")
-
-        progress = goal_service.calculate_goal_progress(goal)
-        st.info(
-            f"**Target:** RM {goal.target_amount:,.2f}\n\n"
-            f"**Current Progress:** {progress['progress_pct']:.1f}%\n\n"
-            f"**Deadline:** {progress['deadline']}"
-        )
-
         st.error(
-            "⚠️ **Warning:** This action cannot be undone. The goal and its progress history will be permanently deleted."
+            "**Warning:** This action cannot be undone. The goal and its progress history will be permanently deleted."
         )
 
-        # Confirmation
-        confirm = st.checkbox("I understand this action cannot be undone")
+        # Confirmation checkbox
+        confirm = st.checkbox(
+            "I understand this action cannot be undone",
+            help="Please confirm you want to delete this goal",
+        )
 
         # Delete button
-        if st.button(
-            "🗑️ Delete Goal",
-            type="primary",
-            disabled=not confirm,
-            use_container_width=True,
-        ):
+        if st.button("Delete Goal"):
+            if not confirm:
+                utility.warning_popup(
+                    "Please confirm deletion by checking the checkbox above."
+                )
+                return
+
             try:
                 goal_service.delete_goal(goal.id)
                 utility.success_popup(f"Goal '{goal.name}' deleted successfully")

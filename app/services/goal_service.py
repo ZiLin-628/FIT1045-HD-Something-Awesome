@@ -87,7 +87,9 @@ class GoalService:
 
         # Get account if specified
         account_id = None
-        initial_balance = Decimal("0")
+        initial_balance = Decimal(
+            "0"
+        )  # Always start at 0 since progress tracks income only
 
         if account_name and account_name.strip():
             account = self.account_service.get_account(account_name.strip())
@@ -97,17 +99,9 @@ class GoalService:
                 )
                 raise NotFoundError(f"Account '{account_name}' not found")
             account_id = account.id
-            initial_balance = account.balance
-            logger.info(
-                f"Goal linked to account '{account_name}' with balance {initial_balance}"
-            )
+            logger.info(f"Goal linked to account '{account_name}'")
         else:
-            # No specific account - use total balance across all accounts
-            accounts = self.account_service.get_all_accounts()
-            initial_balance = sum(acc.balance for acc in accounts)
-            logger.info(
-                f"Goal using total balance across all accounts: {initial_balance}"
-            )
+            logger.info("Goal tracks income from all accounts")
 
         # Create goal
         goal = Goal(
@@ -176,6 +170,8 @@ class GoalService:
     def calculate_goal_progress(self, goal: Goal) -> dict:
         """
         Calculate detailed progress for a goal.
+        Progress is based on net income (Income - Expenses) since goal creation.
+        This reflects actual savings behavior.
 
         Args:
             goal: Goal object
@@ -184,20 +180,63 @@ class GoalService:
             Dictionary with progress details
         """
         logger.info(f"Calculating progress for goal: {goal.name} (ID: {goal.id})")
-        # Get current amount
-        if goal.account_id:
-            # Linked to specific account
-            accounts = self.account_service.get_all_accounts()
-            account = next((a for a in accounts if a.id == goal.account_id), None)
-            current_amount = account.balance if account else Decimal("0")
-        else:
-            # Track total balance across all accounts
-            accounts = self.account_service.get_all_accounts()
-            current_amount = sum(acc.balance for acc in accounts)
 
-        # Calculate progress using initial balance from when goal was created
-        initial_amount = goal.initial_balance
-        progress_amount = current_amount - initial_amount
+        # Get all transactions since goal was created
+        from app.database.models import Transaction, TransactionType
+
+        # Get goal creation date
+        created_date = (
+            goal.created_at.date()
+            if isinstance(goal.created_at, datetime)
+            else goal.created_at
+        )
+        created_datetime = datetime.combine(created_date, datetime.min.time())
+
+        # Query for transactions since goal creation
+        if goal.account_id:
+            # Linked to specific account - count transactions for that account only
+            income_transactions = (
+                self.db_session.query(Transaction)
+                .filter(
+                    Transaction.account_id == goal.account_id,
+                    Transaction.transaction_type == TransactionType.INCOME,
+                    Transaction.datetime >= created_datetime,
+                )
+                .all()
+            )
+            expense_transactions = (
+                self.db_session.query(Transaction)
+                .filter(
+                    Transaction.account_id == goal.account_id,
+                    Transaction.transaction_type == TransactionType.EXPENSE,
+                    Transaction.datetime >= created_datetime,
+                )
+                .all()
+            )
+        else:
+            # All accounts - count transactions from all accounts
+            income_transactions = (
+                self.db_session.query(Transaction)
+                .filter(
+                    Transaction.transaction_type == TransactionType.INCOME,
+                    Transaction.datetime >= created_datetime,
+                )
+                .all()
+            )
+            expense_transactions = (
+                self.db_session.query(Transaction)
+                .filter(
+                    Transaction.transaction_type == TransactionType.EXPENSE,
+                    Transaction.datetime >= created_datetime,
+                )
+                .all()
+            )
+
+        # Calculate net income (Income - Expenses), clamped to minimum of 0
+        total_income = sum(t.amount_in_myr for t in income_transactions)
+        total_expenses = sum(t.amount_in_myr for t in expense_transactions)
+        progress_amount = max(Decimal("0"), total_income - total_expenses)
+
         progress_pct = (
             (progress_amount / goal.target_amount * 100)
             if goal.target_amount > 0
@@ -255,12 +294,15 @@ class GoalService:
 
         result = {
             # Current state
-            "initial_balance": float(initial_amount),
-            "current_amount": float(current_amount),
+            "initial_balance": float(goal.initial_balance),
+            "current_amount": float(progress_amount),  # Net income (Income - Expenses)
             "target_amount": float(goal.target_amount),
             "progress_amount": float(progress_amount),
             "remaining_amount": float(remaining_amount),
             "progress_pct": float(progress_pct),
+            # Income/Expense breakdown
+            "total_income": float(total_income),
+            "total_expenses": float(total_expenses),
             # Time tracking
             "days_total": days_total,
             "days_passed": days_passed,
