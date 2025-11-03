@@ -445,3 +445,4 @@ def delete_budget_view(
                 utility.error_popup(f"{e}")
             except Exception as e:
                 utility.error_popup(f"Unexpected error: {e}")
+
