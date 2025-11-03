@@ -2,30 +2,30 @@
 
 A personal finance management application built with Python and Streamlit help to track income and expenses, manage accounts and categories, set financial goals, and generate insightful predictions and summaries.
 
-- [Money Tracker](#money-tracker)
-  - [Features](#features)
-    - [Transaction Management](#transaction-management)
-    - [Filtering](#filtering)
-    - [Account Management](#account-management)
-    - [Category Management](#category-management)
-    - [Budget Management](#budget-management)
-    - [Predictions](#predictions)
-    - [Goal Tracking](#goal-tracking)
-    - [Summaries](#summaries)
-    - [Data Management](#data-management)
-  - [Installation](#installation)
-    - [Step 1: Clone or Download the Repository](#step-1-clone-or-download-the-repository)
-    - [Step 2: Create Virtual Environment](#step-2-create-virtual-environment)
-    - [Step 3: Install Dependencies](#step-3-install-dependencies)
-    - [Step 4: Initialize Database](#step-4-initialize-database)
-    - [Step 5: Running the Application](#step-5-running-the-application)
-  - [Testing](#testing)
+-   [Money Tracker](#money-tracker)
+    -   [Features](#features)
+        -   [Transaction Management](#transaction-management)
+        -   [Filtering](#filtering)
+        -   [Account Management](#account-management)
+        -   [Category Management](#category-management)
+        -   [Budget Management](#budget-management)
+        -   [Predictions](#predictions)
+        -   [Goal Tracking](#goal-tracking)
+        -   [Summaries](#summaries)
+        -   [Data Management](#data-management)
+    -   [Installation](#installation)
+        -   [Step 1: Clone or Download the Repository](#step-1-clone-or-download-the-repository)
+        -   [Step 2: Create Virtual Environment](#step-2-create-virtual-environment)
+        -   [Step 3: Install Dependencies](#step-3-install-dependencies)
+        -   [Step 4: Initialize Database](#step-4-initialize-database)
+        -   [Step 5: Running the Application](#step-5-running-the-application)
+    -   [Testing](#testing)
 
 ## Features
 
 **Streamlit-based Web GUI**: Interactive, user-friendly web interface accessible via browser for all operations.
 
-**Multi-Currency System**: Support for multiple currencies with automatic conversion to MYR using Currency API. Exchange rates cached for 1 hours.
+**Multi-Currency System**: Support for multiple currencies with automatic conversion to MYR using Currency API. Exchange rates cached daily and refresh at midnight (00:00).
 
 ### Transaction Management
 
@@ -81,8 +81,6 @@ A personal finance management application built with Python and Streamlit help t
 -   **Edit Goals**: Modify goal details
 -   **Delete Goals**: Remove a specific goal with confirmation
 
-
-
 ### Summaries
 
 -   **Daily Summary**: Total income, expenses, and net balance for any specific day
@@ -90,7 +88,6 @@ A personal finance management application built with Python and Streamlit help t
 -   **Monthly Summary**: Total income, expenses, and net balance for any month
 -   **Expense Breakdown**: Expenses by category over date ranges with pie charts
 -   **Income Breakdown**: Income by category over date ranges with pie charts
-
 
 ### Data Management
 
@@ -150,4 +147,3 @@ The project includes comprehensive unit tests for all services:
 # Run all tests
 pytest
 ```
-
