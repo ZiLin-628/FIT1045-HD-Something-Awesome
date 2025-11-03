@@ -247,7 +247,7 @@ class PredictionService:
         """
 
         if len(historical_totals) >= 2:
-            historical_avg = self.predict_with_exp_smoothing(historical_totals)
+            historical_avg = self.predict_with_exponential_smoothing(historical_totals)
             method = "Exponential Smoothing"
 
         # Single historical value
@@ -294,7 +294,7 @@ class PredictionService:
             )
         return historical_rate
 
-    def predict_with_exp_smoothing(self, historical_values: list) -> float:
+    def predict_with_exponential_smoothing(self, historical_values: list) -> float:
         """
         Predict next month's spending using Exponential Smoothing.
 

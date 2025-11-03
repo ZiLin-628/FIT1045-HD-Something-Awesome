@@ -114,7 +114,7 @@ class TestPredictWithExpSmoothing:
         "ignore::statsmodels.tools.sm_exceptions.ConvergenceWarning"
     )
     def test_smoothing_variations(self, prediction_service, historical, expected):
-        result = prediction_service.predict_with_exp_smoothing(historical)
+        result = prediction_service.predict_with_exponential_smoothing(historical)
 
         if isinstance(expected, tuple):
             assert expected[0] < result < expected[1]
@@ -126,7 +126,7 @@ class TestPredictWithExpSmoothing:
             "app.services.prediction_service.SimpleExpSmoothing",
             side_effect=Exception("Error"),
         ):
-            result = prediction_service.predict_with_exp_smoothing(
+            result = prediction_service.predict_with_exponential_smoothing(
                 [100.0, 100.0, 100.0]
             )
         assert result == 100.0

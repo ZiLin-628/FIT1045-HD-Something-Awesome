@@ -25,7 +25,7 @@ class CurrencyService:
     API_VERSION = "v1"
 
     # Refresh duration
-    CACHE_DURATION_HOURS = 24
+    CACHE_DURATION_HOURS = 1
 
     def __init__(self, db_session):
         """
