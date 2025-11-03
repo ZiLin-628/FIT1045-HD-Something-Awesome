@@ -11,9 +11,6 @@ from app.exception import AlreadyExistsError, InvalidInputError, NotFoundError
 from app.services.budget_service import BudgetService
 
 
-# ---- Fixtures ----
-
-
 @pytest.fixture
 def mock_db_session():
     return MagicMock()
@@ -27,9 +24,6 @@ def mock_category_service():
 @pytest.fixture
 def budget_service(mock_db_session, mock_category_service):
     return BudgetService(mock_db_session, mock_category_service)
-
-
-# ---- get_budget ----
 
 
 class TestGetBudget:
@@ -47,9 +41,6 @@ class TestGetBudget:
     def test_get_budget_not_exists(self, budget_service, mock_db_session):
         mock_db_session.query().filter_by().first.return_value = None
         assert budget_service.get_budget(999) is None
-
-
-# ---- get_category_budget ----
 
 
 class TestGetCategoryBudget:
@@ -83,9 +74,6 @@ class TestGetCategoryBudget:
         assert budget_service.get_category_budget("Food", "expense") is None
 
 
-# ---- get_all_budgets ----
-
-
 class TestGetAllBudgets:
 
     def test_returns_all_budgets(self, budget_service, mock_db_session):
@@ -109,9 +97,6 @@ class TestGetAllBudgets:
     def test_returns_empty_list_if_no_budgets(self, budget_service, mock_db_session):
         mock_db_session.query().all.return_value = []
         assert budget_service.get_all_budgets() == []
-
-
-# ---- add_budget ----
 
 
 class TestAddBudget:
@@ -200,9 +185,6 @@ class TestAddBudget:
             budget_service.add_budget("Food", "expense", "100", "monthly")
 
 
-# ---- edit_budget ----
-
-
 class TestEditBudget:
 
     def test_edit_budget_success_updates_fields(
@@ -287,9 +269,6 @@ class TestEditBudget:
             budget_service.edit_budget("Food", "income", new_limit_amount="50")
 
 
-# ---- delete_budget ----
-
-
 class TestDeleteBudget:
 
     def test_delete_budget_success(
@@ -322,9 +301,6 @@ class TestDeleteBudget:
         mock_category_service.get_category_by_name_and_type.return_value = None
         with pytest.raises(NotFoundError):
             budget_service.delete_budget("Food", "expense")
-
-
-# ---- get_budget_status (and period logic) ----
 
 
 class TestGetBudgetStatus:
@@ -429,9 +405,6 @@ class TestGetBudgetStatus:
         assert status["period_end"] == start_date + timedelta(weeks=1)
 
 
-# ---- get_all_budget_statuses ----
-
-
 class TestAllBudgetStatuses:
 
     def test_skips_income_and_collects_expense(self, budget_service):
@@ -475,9 +448,6 @@ class TestAllBudgetStatuses:
         assert statuses[0]["budget"] == b2
 
 
-# ---- check_budget_warning ----
-
-
 class TestCheckBudgetWarning:
 
     def test_no_budget_returns_defaults(self, budget_service):
@@ -518,9 +488,6 @@ class TestCheckBudgetWarning:
         r4 = budget_service.check_budget_warning("Food", "expense", Decimal("1"))
         assert r4["warning_level"] == "exceeded"
         assert "BUDGET EXCEEDED" in r4["message"].upper()
-
-
-# ---- get_budgets_at_risk ----
 
 
 class TestGetBudgetsAtRisk:

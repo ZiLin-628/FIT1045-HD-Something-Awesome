@@ -31,9 +31,6 @@ def filter_service(mock_db_session, mock_account_service, mock_category_service)
     return FilterService(mock_db_session, mock_account_service, mock_category_service)
 
 
-# ---------------------------
-# Helper to create mock transactions
-# ---------------------------
 def create_transaction(
     id=1,
     account_id=1,
@@ -55,9 +52,6 @@ def create_transaction(
     return transaction
 
 
-# ===========================
-# Tests for filter by category
-# ===========================
 class TestFilterByCategory:
 
     def test_existing_category_returns_transactions(
@@ -111,9 +105,6 @@ class TestFilterByCategory:
             filter_service.filter_transaction_by_category("Unknown")
 
 
-# ===========================
-# Tests for filter by account
-# ===========================
 class TestFilterByAccount:
 
     def test_existing_account_returns_transactions(
@@ -167,9 +158,6 @@ class TestFilterByAccount:
             filter_service.filter_transaction_by_account("Unknown")
 
 
-# ========================================
-# Tests for filter by transaction type
-# ========================================
 class TestFilterByTransactionType:
 
     def test_filter_income_transactions(self, filter_service, mock_db_session):
@@ -210,9 +198,6 @@ class TestFilterByTransactionType:
             filter_service.filter_transaction_by_transaction_type("")
 
 
-# ===========================
-# Integration / Combined Filters
-# ===========================
 class TestCombinedFilters:
 
     def test_filter_by_category_then_account(
@@ -290,9 +275,6 @@ class TestCombinedFilters:
             filter_service.filter_transaction_by_account("Wallet")
 
 
-# ===========================
-# Validation / Normalization
-# ===========================
 class TestNormalizationValidation:
 
     def test_category_account_trimmed(

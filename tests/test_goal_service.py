@@ -11,9 +11,6 @@ from app.exception import AlreadyExistsError, InvalidInputError, NotFoundError
 from app.services.goal_service import GoalService
 
 
-# ---- Fixtures ----
-
-
 @pytest.fixture
 def mock_db_session():
     return MagicMock()
@@ -27,9 +24,6 @@ def mock_account_service():
 @pytest.fixture
 def goal_service(mock_db_session, mock_account_service):
     return GoalService(mock_db_session, mock_account_service)
-
-
-# ---- add_goal ----
 
 
 class TestAddGoal:
@@ -110,9 +104,6 @@ class TestAddGoal:
             )
 
 
-# ---- basic getters ----
-
-
 class TestGetGoals:
 
     def test_get_goal_by_id(self, goal_service, mock_db_session):
@@ -165,9 +156,6 @@ class TestGetGoals:
         )
         mock_db_session.query().filter().order_by().all.return_value = [g1]
         assert goal_service.get_active_goals() == [g1]
-
-
-# ---- calculate_goal_progress ----
 
 
 class TestCalculateGoalProgress:
@@ -228,9 +216,6 @@ class TestCalculateGoalProgress:
         result = goal_service.calculate_goal_progress(goal)
         assert result["progress_pct"] == pytest.approx(125.0)
         assert result["status"] in {"on_track", "achieved"}
-
-
-# ---- edit_goal ----
 
 
 class TestEditGoal:
@@ -299,9 +284,6 @@ class TestEditGoal:
             goal_service.edit_goal(999, name="any")
 
 
-# ---- mark and delete ----
-
-
 class TestMarkDeleteGoal:
 
     def test_mark_goal_completed(self, goal_service, mock_db_session):
@@ -342,9 +324,6 @@ class TestMarkDeleteGoal:
         goal_service.get_goal = MagicMock(return_value=None)
         with pytest.raises(NotFoundError):
             goal_service.delete_goal(999)
-
-
-# ---- summary ----
 
 
 class TestGoalsSummary:
