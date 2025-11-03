@@ -200,13 +200,13 @@ def edit_account_view(account_service: AccountService):
                 )
 
             except InvalidInputError as e:
-                utility.error_popup(f"❌ Invalid input: {e}")
+                utility.error_popup(f"Invalid input: {e}")
             except NotFoundError as e:
-                utility.error_popup(f"❌ {e}")
+                utility.error_popup(f"{e}")
             except AlreadyExistsError as e:
-                utility.error_popup(f"❌ {e}")
+                utility.error_popup(f"{e}")
             except Exception as e:
-                utility.error_popup(f"❌ Unexpected error: {e}")
+                utility.error_popup(f"Unexpected error: {e}")
 
 
 def delete_account_view(account_service: AccountService):
@@ -263,8 +263,8 @@ def delete_account_view(account_service: AccountService):
                 )
 
             except InvalidInputError as e:
-                utility.error_popup(f"❌ Invalid input: {e}")
+                utility.error_popup(f"Invalid input: {e}")
             except NotFoundError as e:
-                utility.error_popup(f"❌ {e}")
+                utility.error_popup(f"{e}")
             except Exception as e:
-                utility.error_popup(f"❌ Unexpected error: {e}")
+                utility.error_popup(f"Unexpected error: {e}")

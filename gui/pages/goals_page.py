@@ -128,7 +128,7 @@ def add_goal_view(goal_service: GoalService, account_service: AccountService):
                     description=description,
                 )
 
-                utility.success_popup(f"Goal '{name}' created successfully! 🎉")
+                utility.success_popup(f"Goal '{name}' created successfully!")
 
             except (InvalidInputError, NotFoundError) as e:
                 utility.error_popup(f"Error: {e}")
@@ -197,9 +197,8 @@ def display_goal_card(goal: Goal, goal_service: GoalService, is_completed=False)
                     try:
                         goal_service.mark_goal_completed(goal.id)
                         utility.success_popup(
-                            f"Goal '{goal.name}' marked as completed! 🎉"
+                            f"Goal '{goal.name}' marked as completed!"
                         )
-                        st.rerun()
                     except Exception as e:
                         utility.error_popup(f"Error: {e}")
 
@@ -339,7 +338,7 @@ def edit_goal_view(goal_service: GoalService):
                 )
 
                 utility.success_popup("Goal updated successfully!")
-                st.rerun()
+
 
             except (InvalidInputError, NotFoundError) as e:
                 utility.error_popup(f"Error: {e}")
@@ -391,7 +390,7 @@ def delete_goal_view(goal_service: GoalService):
             try:
                 goal_service.delete_goal(goal.id)
                 utility.success_popup(f"Goal '{goal.name}' deleted successfully")
-                st.rerun()
+
 
             except NotFoundError as e:
                 utility.error_popup(f"Error: {e}")
