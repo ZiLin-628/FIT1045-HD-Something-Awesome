@@ -237,7 +237,7 @@ def display_goal_card(goal: Goal, goal_service: GoalService, is_completed=False)
         # Timeline
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.caption(f"**Deadline:** {progress['deadline']}")
+            st.caption(f"**Deadline:** {goal.deadline.date().strftime('%Y-%m-%d')}")
         with col2:
             st.caption(f"**Days Remaining:** {progress['days_remaining']}")
         with col3:
@@ -339,7 +339,6 @@ def edit_goal_view(goal_service: GoalService):
 
                 utility.success_popup("Goal updated successfully!")
 
-
             except (InvalidInputError, NotFoundError) as e:
                 utility.error_popup(f"Error: {e}")
 
@@ -390,7 +389,6 @@ def delete_goal_view(goal_service: GoalService):
             try:
                 goal_service.delete_goal(goal.id)
                 utility.success_popup(f"Goal '{goal.name}' deleted successfully")
-
 
             except NotFoundError as e:
                 utility.error_popup(f"Error: {e}")

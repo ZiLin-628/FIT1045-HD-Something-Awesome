@@ -8,7 +8,7 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
-from app.database.models import Goal
+from app.database.models import Goal, Transaction, TransactionType
 from app.exception import InvalidInputError, NotFoundError, AlreadyExistsError
 from app.utility import validate_non_empty_string, validate_non_negative_amount
 
@@ -179,15 +179,8 @@ class GoalService:
         """
         logger.info(f"Calculating progress for goal: {goal.name} (ID: {goal.id})")
 
-        # Get all transactions since goal was created
-        from app.database.models import Transaction, TransactionType
-
         # Get goal creation date
-        created_date = (
-            goal.created_at.date()
-            if isinstance(goal.created_at, datetime)
-            else goal.created_at
-        )
+        created_date = goal.created_at.date()
         created_datetime = datetime.combine(created_date, datetime.min.time())
 
         # Query transactions since goal creation
@@ -244,16 +237,8 @@ class GoalService:
 
         # Time calculations
         today = date.today()
-        deadline_date = (
-            goal.deadline.date()
-            if isinstance(goal.deadline, datetime)
-            else goal.deadline
-        )
-        created_date = (
-            goal.created_at.date()
-            if isinstance(goal.created_at, datetime)
-            else goal.created_at
-        )
+        deadline_date = goal.deadline.date()
+        created_date = goal.created_at.date()
 
         days_total = (deadline_date - created_date).days
         days_passed = (today - created_date).days
@@ -292,8 +277,6 @@ class GoalService:
 
         result = {
             # Current state
-            "initial_balance": float(goal.initial_balance),
-            "current_amount": float(progress_amount),  # Net income (Income - Expenses)
             "target_amount": float(goal.target_amount),
             "progress_amount": float(progress_amount),
             "remaining_amount": float(remaining_amount),
@@ -313,14 +296,10 @@ class GoalService:
             "on_track": on_track,
             "status": status,
             "expected_progress_pct": float(expected_progress_pct),
-            # Goal details
-            "goal_name": goal.name,
-            "goal_id": goal.id,
-            "deadline": deadline_date.strftime("%Y-%m-%d"),
+            # Account context
             "account_name": (
                 goal.account.account_name if goal.account else "All Accounts"
             ),
-            "description": goal.description or "",
         }
         logger.info(
             f"Goal '{goal.name}' progress: {float(progress_pct):.1f}%, status: {status}"
@@ -382,9 +361,7 @@ class GoalService:
             goal.target_amount = target
 
         if deadline is not None:
-            deadline_date = (
-                deadline.date() if isinstance(deadline, datetime) else deadline
-            )
+            deadline_date = deadline if isinstance(deadline, date) else deadline.date()
             if deadline_date <= date.today():
                 logger.warning(
                     f"Goal edit failed: Deadline {deadline_date} is not in the future"

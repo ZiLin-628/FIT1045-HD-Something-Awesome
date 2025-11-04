@@ -79,9 +79,7 @@ def show_dashboard_page():
         st.divider()
 
         # Smart Predictions
-        show_spending_prediction_widget(
-            prediction_service, current_year, current_month
-        )
+        show_spending_prediction_widget(prediction_service, current_year, current_month)
 
     except Exception as e:
         st.error(f"❌ Error loading dashboard: {str(e)}")
@@ -274,7 +272,6 @@ def show_spending_prediction_widget(
             current_spending = prediction["current_spending"]
             budget_limit = prediction["budget_limit"]
             predicted_usage_pct = prediction["predicted_usage_pct"]
-            confidence = prediction["confidence"]
             method = prediction["method"]
             period_start = prediction.get("period_start")
             period_end = prediction.get("period_end")
@@ -336,7 +333,6 @@ def show_spending_prediction_widget(
                     else:
                         st.write(f"**Remaining:** RM {abs(overage):,.2f}")
 
-                    st.write(f"**Confidence:** {confidence.upper()}")
                     st.write(f"**Method:** {method}")
 
                 # Recommendation

@@ -252,7 +252,7 @@ class BudgetService:
         category_name = validate_non_empty_string(category_name, "Category name")
         transaction_type = validate_transaction_type(transaction_type_input)
 
-        # Enforce expense-only budgets
+        # expense-only budgets
         if transaction_type != TransactionType.EXPENSE:
             logger.warning(
                 f"Budget edit failed: Cannot edit budget for {transaction_type.value} category"

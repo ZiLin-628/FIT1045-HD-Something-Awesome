@@ -84,8 +84,8 @@ class PredictionService:
         historical_daily_rate, method = self.calculate_historical_rate(
             historical_totals, period_data["days_in_period"]
         )
-        
-        # Now have 
+
+        # Now have
 
         # Blend current and historical trends
         blended_daily_rate = self.mix_daily_rates(
@@ -107,9 +107,6 @@ class PredictionService:
             "daily_rate_predicted": blended_daily_rate,
             "days_passed": period_data["days_passed"],
             "days_remaining": period_data["days_remaining"],
-            "confidence": self.calculate_confidence(
-                period_data["days_passed"], len(historical_totals)
-            ),
             "historical_average": (
                 Decimal(str(historical_totals[-1]))
                 if historical_totals
@@ -157,7 +154,7 @@ class PredictionService:
             current_spending = self.get_spending_in_period(
                 category_name, period_start, period_end
             )
-            
+
         else:
             # Use calendar month
             days_in_period = calendar.monthrange(year, month)[1]
@@ -468,7 +465,7 @@ class PredictionService:
         )
 
         total = sum(t.amount_in_myr for t in transactions)
-        
+
         # Rertun 0.00 if not= transaction found
         return Decimal(str(total))
 
@@ -510,33 +507,6 @@ class PredictionService:
         historical.reverse()
 
         return historical
-
-    def calculate_confidence(self, days_passed: int, historical_count: int) -> str:
-        """Estimate confidence level of the prediction.
-
-        Args:
-            days_passed (int): Days passed in the current period.
-            historical_count (int): Number of months of historical data.
-
-        Returns:
-            str: 'low', 'medium', or 'high' confidence.
-        """
-
-        # Score based on current month progress
-        day_score = min(days_passed / 7, 1.0)
-
-        # Score based on historical data
-        history_score = min(historical_count / 6, 1.0)
-
-        # Combined score
-        total_score = (day_score + history_score) / 2
-
-        if total_score >= 0.7:
-            return "high"
-        elif total_score >= 0.4:
-            return "medium"
-        else:
-            return "low"
 
     def get_budget_period_info(
         self, category_name: str, year: int, month: int
