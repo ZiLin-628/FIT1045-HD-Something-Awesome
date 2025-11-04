@@ -324,7 +324,7 @@ def show_spending_prediction_widget(
                 with col_a:
                     st.write(f"**Current Spending:** RM {current_spending:,.2f}")
                     st.write(f"**Predicted Total:** RM {predicted_total:,.2f}")
-                    st.write(f"**Budget Limit:** RM {budget_limit:,.2f}")
+                    
 
                 with col_b:
                     overage = predicted_total - budget_limit
@@ -333,7 +333,7 @@ def show_spending_prediction_widget(
                     else:
                         st.write(f"**Remaining:** RM {abs(overage):,.2f}")
 
-                    st.write(f"**Method:** {method}")
+                    st.write(f"**Budget Limit:** RM {budget_limit:,.2f}")
 
                 # Recommendation
                 recommendation = prediction_service.get_spending_recommendation(
