@@ -106,7 +106,7 @@ class CurrencyService:
         Returns:
             Decimal | None: Cached rate or None if expired/not found.
         """
-        # Get start of today (midnight 00:00:00)
+        # Get start of today
         today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
         rate_record = (
@@ -168,7 +168,7 @@ class CurrencyService:
                 response = requests.get(url, timeout=5)
                 response.raise_for_status()
 
-                # Result stored
+                # Get result
                 data = response.json()
 
                 # If first URL not working, try next
@@ -183,7 +183,7 @@ class CurrencyService:
                         f"Currency {to_currency} not found in API data"
                     )
 
-                # Get the rate for "TARGET CURRENCY" = X (in MYR)
+                # Get the rate
                 rate = Decimal(str(rates_dict[to_currency_lower]))
 
                 # Cache the rate

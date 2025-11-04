@@ -143,9 +143,9 @@ def add_transaction_view(
 
     description = st.text_area("Description (Optional)", key="add_transaction_desc")
 
-    # Budget warning check (BEFORE form submission - shows live as user types)
+    # Budget warning check
     if transaction_type == "Expense" and category and amount > 0 and currency:
-        # Convert amount to MYR for budget check
+        # Convert amount to MYR
         amount_in_myr = format_amount(amount)
         if currency != "MYR":
             try:

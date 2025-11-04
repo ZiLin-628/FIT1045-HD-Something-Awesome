@@ -84,9 +84,11 @@ class PredictionService:
         historical_daily_rate, method = self.calculate_historical_rate(
             historical_totals, period_data["days_in_period"]
         )
+        
+        # Now have 
 
-        # Blend current and historical trends for stability
-        blended_daily_rate = self.blend_rates(
+        # Blend current and historical trends
+        blended_daily_rate = self.mix_daily_rates(
             current_daily_rate,
             historical_daily_rate,
             period_data["days_passed"],
@@ -155,6 +157,7 @@ class PredictionService:
             current_spending = self.get_spending_in_period(
                 category_name, period_start, period_end
             )
+            
         else:
             # Use calendar month
             days_in_period = calendar.monthrange(year, month)[1]
@@ -236,28 +239,19 @@ class PredictionService:
         self, historical_totals: list, days_in_period: int
     ) -> tuple[Decimal, str]:
         """
-        Calculate the average daily rate from historical data.
+        Calculate the average daily rate from historical data using exponential smoothing.
 
         Args:
-            historical_totals (list): List of previous monthly totals.
+            historical_totals (list): List of previous monthly totals (always 6 months).
             days_in_period (int): Days in the current period.
 
         Returns:
             tuple[Decimal, str]: (historical daily rate, method name)
         """
 
-        if len(historical_totals) >= 2:
-            historical_avg = self.predict_with_exponential_smoothing(historical_totals)
-            method = "Exponential Smoothing"
-
-        # Single historical value
-        elif len(historical_totals) == 1:
-            historical_avg = historical_totals[0]
-            method = "Simple Average"
-
-        # No historical data
-        else:
-            return Decimal("0"), "Current Pace Only"
+        # Always use exponential smoothing (lookback_months is fixed at 6)
+        historical_avg = self.predict_with_exponential_smoothing(historical_totals)
+        method = "Exponential Smoothing"
 
         # Convert to daily rate
         historical_daily_rate = Decimal(str(historical_avg)) / Decimal(
@@ -265,7 +259,7 @@ class PredictionService:
         )
         return historical_daily_rate, method
 
-    def blend_rates(
+    def mix_daily_rates(
         self,
         current_rate: Decimal,
         historical_rate: Decimal,
@@ -316,7 +310,7 @@ class PredictionService:
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore")
 
-                # Create and fit model with auto-optimized smoothing parameter
+                # Create and fit model
                 model = SimpleExpSmoothing(historical_values)
                 fitted_model = model.fit(optimized=True)
 
@@ -326,7 +320,7 @@ class PredictionService:
             return float(prediction)
 
         except Exception:
-            # Fallback to simple average if model fails
+            # Fallback to simple average
             return (
                 sum(historical_values) / len(historical_values)
                 if historical_values
@@ -376,7 +370,7 @@ class PredictionService:
                 logger.warning(f"Failed to predict for category {category.name}: {e}")
                 continue
 
-        # Sort by usage percentage (highest first)
+        # Sort by usage percentage descending
         budgeted.sort(key=lambda x: x.get("predicted_usage_pct", 0), reverse=True)
         logger.info(f"Generated predictions for {len(budgeted)} budgeted categories")
 
@@ -407,7 +401,7 @@ class PredictionService:
                 "message": "No budget set for this category.",
             }
 
-        # Calculate recommended daily rate to stay within budget
+        # Calculate recommended daily rate
         days_remaining = prediction["days_remaining"]
         current_spending = prediction["current_spending"]
         budget_limit = prediction["budget_limit"]
@@ -474,6 +468,8 @@ class PredictionService:
         )
 
         total = sum(t.amount_in_myr for t in transactions)
+        
+        # Rertun 0.00 if not= transaction found
         return Decimal(str(total))
 
     def get_historical_monthly_spending(
@@ -510,7 +506,7 @@ class PredictionService:
             spending = self.get_category_spending(category_name, year, month)
             historical.append(float(spending))
 
-        # Reverse to get chronological order (oldest first)
+        # Reverse to chronological order
         historical.reverse()
 
         return historical
@@ -526,10 +522,10 @@ class PredictionService:
             str: 'low', 'medium', or 'high' confidence.
         """
 
-        # Score based on current month progress (max at 7 days)
+        # Score based on current month progress
         day_score = min(days_passed / 7, 1.0)
 
-        # Score based on historical data (max at 6 months)
+        # Score based on historical data
         history_score = min(historical_count / 6, 1.0)
 
         # Combined score
@@ -570,6 +566,7 @@ class PredictionService:
             if not category:
                 return None
 
+            # Get MONTHLY budgets only
             budget = (
                 self.db_session.query(Budget)
                 .filter_by(category_id=category.id, period=BudgetPeriod.MONTHLY)
@@ -579,7 +576,7 @@ class PredictionService:
             if not budget:
                 return None
 
-            # Use BudgetService to calculate current period (single source of truth)
+            # Calculate current period
             period_start, period_end = self.budget_service._get_current_period(budget)
             days_in_period = (period_end - period_start).days
 

@@ -130,7 +130,7 @@ def _display_budget_status(status: dict):
         st.markdown(f"**Remaining:** RM {status['remaining']:,.2f}")
 
     # Progress bar
-    percentage = min(status["percentage"], 100)  # Cap at 100 for display
+    percentage = min(status["percentage"], 100)
     if status["is_exceeded"]:
         st.progress(1.0, text=f"{status['percentage']:.1f}% used (EXCEEDED)")
     else:

@@ -74,12 +74,12 @@ def show_dashboard_page():
         st.divider()
 
         # Budget Alerts
-        _show_budget_summary_widget(budget_service)
+        show_budget_summary_widget(budget_service)
 
         st.divider()
 
         # Smart Predictions
-        _show_spending_prediction_widget(
+        show_spending_prediction_widget(
             prediction_service, current_year, current_month
         )
 
@@ -89,7 +89,7 @@ def show_dashboard_page():
         db_session.close()
 
 
-def _show_budget_summary_widget(budget_service: BudgetService):
+def show_budget_summary_widget(budget_service: BudgetService):
     """Display budget summary widget showing budgets at risk."""
 
     st.subheader("Budget Overview")
@@ -134,7 +134,7 @@ def _show_budget_summary_widget(budget_service: BudgetService):
             )
 
         # Display budgets at risk
-        for budget_status in budgets_at_risk[:5]:  # Show top 5 at risk
+        for budget_status in budgets_at_risk[:5]:  # Top 5 budgets
             category_name = budget_status["budget"].category.name
             percentage = budget_status["percentage"]
             spent = budget_status["spent"]
@@ -151,7 +151,7 @@ def _show_budget_summary_widget(budget_service: BudgetService):
             else:
                 color = "🟡"
 
-            # Create expandable section for each budget
+            # Create expandable section
             with st.expander(
                 f"{color} **{category_name}** - {percentage:.1f}% used",
                 expanded=percentage >= 100,
@@ -183,12 +183,12 @@ def _show_budget_summary_widget(budget_service: BudgetService):
         st.error(f"Error loading budget alerts: {str(e)}")
 
 
-def _show_spending_prediction_widget(
+def show_spending_prediction_widget(
     prediction_service: PredictionService, year: int, month: int
 ):
     """Display spending prediction widget using EWMA."""
 
-    st.subheader("Smart Spending Prediction")
+    st.subheader("Spending Prediction")
 
     try:
         # Get predictions for all categories with budgets
@@ -281,7 +281,7 @@ def _show_spending_prediction_widget(
             days_passed = prediction.get("days_passed", 0)
             days_remaining = prediction.get("days_remaining", 0)
 
-            # Ensure days_remaining is not negative
+            # Clamp days_remaining at 0
             days_remaining = max(0, days_remaining)
 
             # Determine color and icon based on predicted usage
@@ -297,7 +297,7 @@ def _show_spending_prediction_widget(
             # Create expandable section
             with st.expander(
                 f"{icon} **{category_name}** - {predicted_usage_pct:.0f}% predicted",
-                expanded=prediction["will_exceed"],  # Only auto-expand if exceeding
+                expanded=prediction["will_exceed"],
             ):
                 # Show budget period if available
                 if period_start and period_end:

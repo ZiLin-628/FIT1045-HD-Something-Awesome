@@ -706,7 +706,7 @@ class BudgetService:
             if status["percentage"] >= threshold:
                 at_risk.append(status)
 
-        # Sort by percentage (highest first)
+        # Sort by percentage descending
         at_risk.sort(key=lambda x: x["percentage"], reverse=True)
 
         logger.info(f"Found {len(at_risk)} budgets at or above {threshold}% threshold")

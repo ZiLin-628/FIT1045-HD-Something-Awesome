@@ -87,9 +87,7 @@ class GoalService:
 
         # Get account if specified
         account_id = None
-        initial_balance = Decimal(
-            "0"
-        )  # Always start at 0 since progress tracks income only
+        initial_balance = Decimal("0")
 
         if account_name and account_name.strip():
             account = self.account_service.get_account(account_name.strip())
@@ -192,9 +190,9 @@ class GoalService:
         )
         created_datetime = datetime.combine(created_date, datetime.min.time())
 
-        # Query for transactions since goal creation
+        # Query transactions since goal creation
         if goal.account_id:
-            # Linked to specific account - count transactions for that account only
+            # Linked to specific account
             income_transactions = (
                 self.db_session.query(Transaction)
                 .filter(
@@ -232,7 +230,7 @@ class GoalService:
                 .all()
             )
 
-        # Calculate net income (Income - Expenses), clamped to minimum of 0
+        # Calculate net income
         total_income = sum(t.amount_in_myr for t in income_transactions)
         total_expenses = sum(t.amount_in_myr for t in expense_transactions)
         progress_amount = max(Decimal("0"), total_income - total_expenses)
@@ -364,10 +362,10 @@ class GoalService:
 
         # Update fields if provided
         if name is not None:
-            # Validate name (strips, capitalizes, checks if empty)
+            # Validate name
             name = validate_non_empty_string(name, "Goal name")
 
-            # Check for duplicate (but allow keeping the same name)
+            # Check for duplicate
             if name != goal.name:
                 existing_goal = self.db_session.query(Goal).filter_by(name=name).first()
                 if existing_goal:

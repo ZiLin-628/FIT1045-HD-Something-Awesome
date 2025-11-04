@@ -279,20 +279,20 @@ class TransactionService:
         # Description
         new_description = description.strip()
 
-        # Update datetime if custom_datetime is provided
+        # Update datetime
         if custom_datetime:
             transaction.datetime = (
                 custom_datetime if custom_datetime else get_current_time()
             )
 
-        # Reverse old transaction from old account using stored MYR amount
+        # Reverse old transaction using stored MYR amount
         old_amount_in_myr = transaction.amount_in_myr
         if old_type == TransactionType.INCOME:
             old_account.balance -= old_amount_in_myr
         else:
             old_account.balance += old_amount_in_myr
 
-        # Calculate new MYR amount using the stored exchange rate and format to 2 dp
+        # Calculate new MYR amount using stored exchange rate
         new_amount_in_myr = format_amount(new_amount * transaction.exchange_rate)
 
         # Update transaction fields
@@ -300,9 +300,7 @@ class TransactionService:
         transaction.category = new_category
         transaction.account = new_account
         transaction.amount = new_amount
-        transaction.amount_in_myr = (
-            new_amount_in_myr  # Store new MYR equivalent using historical rate
-        )
+        transaction.amount_in_myr = new_amount_in_myr
         transaction.description = new_description
 
         # Apply new transaction effect using new MYR amount

@@ -83,7 +83,7 @@ class AccountService:
             initial_balance, "Initial balance"
         )
 
-        # Convert to MYR if needed
+        # Convert to MYR
         balance_in_myr = balance_decimal
         if self.currency_service and currency.upper() != "MYR":
             logger.info(f"Converting {balance_decimal} {currency} to MYR")

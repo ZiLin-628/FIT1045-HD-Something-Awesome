@@ -88,7 +88,7 @@ class FilterService:
             logger.warning(f"Filter failed: Account '{account_name}' does not exist")
             raise NotFoundError(f"Account '{account_name}' does not exist.")
 
-        # Filter transactions which are realted to this account
+        # Filter transactions by account
         transactions = (
             self.db_session.query(Transaction).filter_by(account_id=account.id).all()
         )
